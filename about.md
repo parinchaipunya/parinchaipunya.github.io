@@ -4,15 +4,14 @@ title: About
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
+### Affiliations
+1. Department of Mathematics, Faculty of Science, KMUTT.
+1. Center of Excellence in Theoretical and Computational Science, KMUTT.
+1. Energy and Environmental Policy Lab., The Joint Graduate School of Energy and Environment, KMUTT.
 
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[minima](https://github.com/jekyll/minima)
+### Meet up in person
+Kindly make an appointment before meeting me at KMUTT by [email](#Contact).
 
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
-
-
-[jekyll-organization]: https://github.com/jekyll
+### Contact
+- Phone: +66-2470-8985
+- Email: \[my-first-name\]\[dot\]\[first-three-letters-of-my-last-name\]\[at\]kmutt.ac.th
