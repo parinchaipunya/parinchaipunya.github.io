@@ -3,8 +3,7 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: home
+title: Home
 ---
 
-# Welcome
-
-Welcome to my website created with `jekyll`.
+## Under migration to a new server.
