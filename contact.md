@@ -1,7 +1,8 @@
 ---
 layout: page
-title: About
-permalink: /about/
+title: Contact
+permalink: /contact/
+order: 99
 ---
 
 ### Affiliations
@@ -10,8 +11,8 @@ permalink: /about/
 1. Energy and Environmental Policy Lab., The Joint Graduate School of Energy and Environment, KMUTT.
 
 ### Meet up in person
-Kindly make an appointment before meeting me at KMUTT by [email](#Contact).
+Kindly see my [calendar](/cal) and make an appointment before meeting me at KMUTT by [email](#Contact).
 
 ### Contact
 - Phone: +66-2470-8985
-- Email: \[my-first-name\]\[dot\]\[first-three-letters-of-my-last-name\]\[at\]kmutt.ac.th
+- Email: \[my-first-name\]\[dot\]\[first-three-letters-of-my-last-name\]\[at\]kmutt[dot]ac[dot]th
