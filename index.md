@@ -1,7 +1,4 @@
 ---
-# Feel free to add content and custom Front Matter to this file.
-# To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
-
 layout: default
 title: Home
 order: 1
@@ -19,4 +16,4 @@ Optimization (Theory and Modeling), Bilevel optimization, Nash equilibrium, Game
 
 (For past talks click [here]({{ site.baseurl }}{% link _posts/2024-11-03-past-talks.md %}).)
 
-- February 17-21, 2025. CSSS2025 / "On Witsenhausen's paradigm to multi-agent optimization with a touch of energy applications"
+- February 17-21, 2025. [CSSS2025](https://math.sc.su.ac.th/csss2025/) / "On Witsenhausen's paradigm to multi-agent optimization with a touch of energy applications"

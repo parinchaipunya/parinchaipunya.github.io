@@ -1,6 +1,7 @@
 ---
 layout: post
 title:  "Past talks"
+author: Parin Chaipunya
 date:   2024-11-03
 categories: jekyll update
 ---

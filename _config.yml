@@ -1,4 +1,5 @@
 title: Parin Chaipunya
+subtitle: Coffee
 author: 
 # email: 
 # description: >- # this means to ignore newlines until "baseurl:"
@@ -11,6 +12,7 @@ theme: minima
 plugins:
   - jekyll-feed
 
+# header_pages:
 
 # Exclude from processing.
 # The following items will not be processed, by default.
