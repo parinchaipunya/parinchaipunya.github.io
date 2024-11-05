@@ -7,6 +7,16 @@ categories: activity log
 permalink: past-talks
 ---
 
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YDJ2EH8F91"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-YDJ2EH8F91');
+</script>
+
 ## Past talks (from 2022 - present)
 - August 30 - September 1, 2022.   Webinar on Optimization and Numerical Methods in Industries/ "A Gemuetlich Introduction to Different Types of Multi-Agent Optimization Models"
 - September 17-18, 2022.   AMS Sectional Meeting / "Ekeland's Variational Principle and Moving Graphical Constraint in Multi-Agent Models"

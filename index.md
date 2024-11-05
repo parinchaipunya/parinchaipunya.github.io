@@ -4,7 +4,19 @@ title: Home
 order: 1
 ---
 
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YDJ2EH8F91"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-YDJ2EH8F91');
+</script>
+
+
 ![renewable](/assets/images/bkt.jpg)
+<center><p style="font-size:8pt;"> Bang Khun Thian, Bangkok --- 2022 </p></center>
 
 <h2 style="color:red;">Notice! This site is under migration to a new server.</h2>
 
