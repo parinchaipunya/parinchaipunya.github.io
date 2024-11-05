@@ -1,9 +1,10 @@
 ---
 layout: post
-title:  "Past talks"
+title: "Past talks"
 author: Parin Chaipunya
-date:   2024-11-03
-categories: jekyll update
+date: 2024-11-03
+categories: activity log
+permalink: past-talks
 ---
 
 ## Past talks (from 2022 - present)

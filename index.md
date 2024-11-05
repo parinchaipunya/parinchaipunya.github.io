@@ -14,6 +14,12 @@ Optimization (Theory and Modeling), Bilevel optimization, Nash equilibrium, Game
 
 ## Upcoming talks/lectures
 
-(For past talks click [here]({{ site.baseurl }}{% link _posts/2024-11-03-past-talks.md %}).)
+(For past talks click [here]({{ site.url }}{% link _posts/2024-11-03-past-talks.md %}).)
 
 - February 17-21, 2025. [CSSS2025](https://math.sc.su.ac.th/csss2025/) / "On Witsenhausen's paradigm to multi-agent optimization with a touch of energy applications"
+
+## Portals
+
+- [Optimization]({{ site.url}}{% link _posts/2022-08-01-optim.md %})
+- [Linear Algebra]({{ site.url }}{% link _posts/2022-08-03-linalg.md %})
+
