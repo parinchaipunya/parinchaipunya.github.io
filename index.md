@@ -22,4 +22,4 @@ Optimization (Theory and Modeling), Bilevel optimization, Nash equilibrium, Game
 
 - [Optimization]({{ site.url}}{% link _posts/2022-08-01-optim.md %})
 - [Linear Algebra]({{ site.url }}{% link _posts/2022-08-03-linalg.md %})
-
+- [Convex Analysis in Geodesic Spaces]({{ site.url}}{% link _posts/2022-01-05-geodesic-convex-analysis.md %})
