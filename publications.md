@@ -18,8 +18,9 @@ order: 2
 
 ## Publications
 
-1. D. Aussel, P. Chaipunya, **Variational and Quasi-Variational Inequalities Under Local Reproducibility: Solution Concept and Applications**, Journal of Optimization Theory and Applications, accepted.
-1. P. Sanguansuttigul, N. Chayawatto, P. Chaipunya, **A Bilevel QP-PLP Approach to Demand Response Modulation between Consumers and a Single Electricity Seller**, Science and Technology Asia, 2024, 29(2), pp.32--44.
+1. J. Abubakar, P. Chaipunya, P. Kumam, S. Salisu, **A generalized scheme for split inclusion problem with conjugate like direction,** Mathematical Methods of Operations Research, accepted.
+1. D. Aussel, P. Chaipunya, **Variational and quasi-variational inequalities under local reproducibility: Solution concept and applications**, Journal of Optimization Theory and Applications, accepted.
+1. P. Sanguansuttigul, N. Chayawatto, P. Chaipunya, **A bilevel QP-PLP approach to demand response modulation between consumers and a single electricity seller**, Science and Technology Asia, 2024, 29(2), pp.32--44.
 1. S. Termkaew, P. Chaipunya, D. Gopal, P. Kumam, **A contribution to best proximity point theory and an application to partial differential equation**, Optimization, 2024, 73(7), pp.2187--2219.
 1. A.Y. Inuwa, P. Chaipunya, P. Kumam, S. Salisu, **Equilibrium problems and proximal algorithm using tangent space products**, Carpathian Journal of Mathematics, 2024, 40(1), pp. 65--76.
 1. A.Y. Inuwa, P. Kumam,  P. Chaipunya,  S. Salisu, **Fixed point theorems for enriched Kannan mappings in CAT(0) spaces**, Fixed Point Theory and Algorithms for Sciences and Engineering, 2023, 2023(1), 13.
