@@ -30,8 +30,8 @@ Optimization (Theory and Modeling), Bilevel optimization, Nash equilibrium, Game
 
 - January 20-21, 2025. NCAO2025 / "Warning! Bilevel programs ahead."
 - February 17-21, 2025. [CSSS2025](https://math.sc.su.ac.th/csss2025/) / "On Witsenhausen's paradigm to multi-agent optimization with a touch of energy applications"
-- March 10--15, 2025. ICOVAO2025 / "TBA"
-- April 11-12, 2025. Nigerian Math. Activ. / "TBA"
+- March 10--15, 2025. ICOVAO2025 / "A bilvel games whose followers play an abstract economy"
+- April 11-12, 2025. The 2nd International Symposium on Current Trends in Mathematical Sciences (organized by Gombe State Univ., Nigeria), "On multi-follower games with direct preference maps"
 
 ## Portals
 
