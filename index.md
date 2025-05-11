@@ -18,13 +18,17 @@ order: 1
 ![renewable](/assets/images/bkt.jpg)
 <center><p style="font-size:8pt;"> Bang Khun Thian, Bangkok --- 2022 </p></center>
 
-<h2 style="color:red;">Notice! This site is under migration to a new server.</h2>
-
 ## My tags
 
 Optimization (Theory and Modeling), Bilevel optimization, Nash equilibrium, Game theory, Energy and environmental modeling
 
-## Upcoming talks/lectures
+## New preprints
+
+- [Variational principles using a non-symmetric non-triangular distance (with N. Boonyam and P. Kumam)](https://arxiv.org/abs/2504.20575)
+- [An existence theorem for single leader multi-follower games with direct preference maps (with Y. Chummongkhon and P. Kumam)](https://arxiv.org/abs/2504.03399)
+- [KKT reformulations for single leader multi-follower games (with J. Dutta and D. Thirumulanathan)](https://arxiv.org/abs/2503.14962)
+
+## Talks/Lectures (2025)
 
 (For past talks click [here]({{ site.url }}{% link _posts/2024-11-03-past-talks.md %}).)
 
