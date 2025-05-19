@@ -16,6 +16,8 @@ order: 2
 
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
+[My scopus profile](https://www.scopus.com/authid/detail.uri?authorId=55217723700)
+
 ## Publications
 
 1. J. Abubakar, P. Chaipunya, P. Kumam, S. Salisu, **A generalized scheme for split inclusion problem with conjugate like direction,** Mathematical Methods of Operations Research, accepted.
