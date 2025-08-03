@@ -36,7 +36,7 @@ Optimization (Theory and Modeling), Bilevel optimization, Nash equilibrium, Game
 - February 17-21, 2025. [CSSS2025](https://math.sc.su.ac.th/csss2025/) / "On Witsenhausen's paradigm to multi-agent optimization with a touch of energy applications"
 - March 10--15, 2025. ICOVAO2025 / "A bilvel games whose followers play an abstract economy"
 - April 11--12, 2025. The 2nd International Symposium on Current Trends in Mathematical Sciences (organized by Gombe State Univ., Nigeria), "On multi-follower games with direct preference maps"
-- August 3--7, 2025. [AMC2025](https://amc2025.pythonanywhere.com/home) / "Why won't local algorithms work for bilevel games?"
+- August 3--7, 2025. [AMC2025](https://amc2025.pythonanywhere.com/home) / ["Why won't local algorithms work for bilevel games?"]({{ site.url }}/assets/pdfs/amc2025-parin.pdf)
 
 ## Portals
 
