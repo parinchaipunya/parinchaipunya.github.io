@@ -22,8 +22,11 @@ order: 1
 
 Optimization (Theory and Modeling), Bilevel optimization, Nash equilibrium, Game theory, Energy and environmental modeling
 
-## New preprints
+## News
 
+- My lecture note [Linear Algebra for Engineers]({{site.url}}/assets/pdfs/note-linear-alg.pdf) is updated.
+
+### I have new preprints available:
 - [Variational principles using a non-symmetric non-triangular distance (with N. Boonyam and P. Kumam)](https://arxiv.org/abs/2504.20575)
 - [An existence theorem for single leader multi-follower games with direct preference maps (with Y. Chummongkhon and P. Kumam)](https://arxiv.org/abs/2504.03399)
 - [KKT reformulations for single leader multi-follower games (with J. Dutta and D. Thirumulanathan)](https://arxiv.org/abs/2503.14962)
