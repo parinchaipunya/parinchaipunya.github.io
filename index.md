@@ -40,6 +40,7 @@ Optimization (Theory and Modeling), Bilevel optimization, Nash equilibrium, Game
 - March 10--15, 2025. ICOVAO2025 / "A bilvel games whose followers play an abstract economy"
 - April 11--12, 2025. The 2nd International Symposium on Current Trends in Mathematical Sciences (organized by Gombe State Univ., Nigeria), "On multi-follower games with direct preference maps"
 - August 3--7, 2025. [AMC2025](https://amc2025.pythonanywhere.com/home) / ["Why won't local algorithms work for bilevel games?"]({{ site.url }}/assets/pdfs/amc2025parin.pdf)
+- December 4--6, 2025. [ICNAAO2025](https://sites.google.com/iitj.ac.in/icnaao-2025/home) / "On the local solutions of quasiconvex programs and more"
 
 ## Portals
 
