@@ -28,6 +28,7 @@ Optimization (Theory and Modeling), Bilevel optimization, Nash equilibrium, Game
 - My lecture note [Linear Algebra for Engineers]({{site.url}}/assets/pdfs/note-linear-alg.pdf) is updated.
 
 ### I have new preprints available:
+
 - [Variational principles using a non-symmetric non-triangular distance (with N. Boonyam and P. Kumam)](https://arxiv.org/abs/2504.20575)
 - [An existence theorem for single leader multi-follower games with direct preference maps (with Y. Chummongkhon and P. Kumam)](https://arxiv.org/abs/2504.03399)
 - [KKT reformulations for single leader multi-follower games (with J. Dutta and D. Thirumulanathan)](https://arxiv.org/abs/2503.14962)
@@ -41,7 +42,7 @@ Optimization (Theory and Modeling), Bilevel optimization, Nash equilibrium, Game
 - March 10--15, 2025. ICOVAO2025 / "A bilvel games whose followers play an abstract economy"
 - April 11--12, 2025. The 2nd International Symposium on Current Trends in Mathematical Sciences (organized by Gombe State Univ., Nigeria), "On multi-follower games with direct preference maps"
 - August 3--7, 2025. [AMC2025](https://amc2025.pythonanywhere.com/home) / ["Why won't local algorithms work for bilevel games?"]({{ site.url }}/assets/pdfs/amc2025parin.pdf)
-- December 4--7, 2025. [ICNAAO2025](https://sites.google.com/iitj.ac.in/icnaao-2025/home) / ["On the local solutions of quasiconvex programs and more"]
+- December 4--6, 2025. [ICNAAO2025](https://sites.google.com/iitj.ac.in/icnaao-2025/home) / "On the local solutions of quasiconvex programs and more"
 
 ## Portals
 
