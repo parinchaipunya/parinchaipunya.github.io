@@ -2,7 +2,7 @@
 layout: post
 title: "Stochastic Optimization Course for Metropolitan Electricity Authority (MEA)"
 author: Parin Chaipunya
-date: 2022-01-05
+date: 2025-11-11
 categories: portal
 permalink: /_posts/mea_2025
 ---
