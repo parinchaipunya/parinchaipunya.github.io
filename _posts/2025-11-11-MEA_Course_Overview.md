@@ -46,8 +46,8 @@ Lecturer: Parin Chaipunya
 #### Morning (08h30--11h30)
 Introduction to optimization. Linear and quadratic optimization. Convex optimization.
 
-[Slides 1]({{ site.baseurl }}/assets/pdfs/2025_mea/optim_part1.pdf)
-[Slides 2]({{ site.baseurl }}/assets/pdfs/2025_mea/optim_part2.pdf)
+[Slides 1]({{ site.baseurl }}/assets/2025_mea/optim_part1.pdf)
+[Slides 2]({{ site.baseurl }}/assets/2025_mea/optim_part2.pdf)
 
 #### Afternoon (12h30--15h30)
 Modeling session
