@@ -44,7 +44,7 @@ Lecturer: Parin Chaipunya
 ### Monday 17 November 2025
 
 #### Morning (08h30--11h30)
-Introduction to optimization. Linear and quadratic optimization. Convex optimization.
+Introduction to optimization. Local and global solutions. Linear and quadratic programs. Convexity. Deterministic modeling of economic dispatch in single and multiple time-steps. Deterministic modeling of transmission expansion.
 
 [Slides 1]({{ site.baseurl }}/assets/2025_mea/optim_part1.pdf)
 [Slides 2]({{ site.baseurl }}/assets/2025_mea/optim_part2.pdf)
@@ -55,7 +55,10 @@ Modeling session
 ### Thursday 20 November 2025
 
 #### Morning (08h30--11h30)
-Mathematics of uncertainty. Probability and random variables. A simple stochastic optimization.
+Mathematics of uncertainty. Probability and random variables. Law of large numbers. A simple stochastic optimization. Blood testing problem. News boy problem. Stochastic economic dispatch in single-timestep.
+
+[Slides 3]({{ site.baseurl }}/assets/2025_mea/optim_part3.pdf)
+[Slides 4]({{ site.baseurl }}/assets/2025_mea/optim_part4.pdf)
 
 #### Afternoon (12h30--15h30)
 Modeling session
