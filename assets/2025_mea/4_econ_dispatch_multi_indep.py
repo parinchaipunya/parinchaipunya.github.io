@@ -2,10 +2,7 @@ from pyscipopt import Model, quicksum
 import matplotlib.pyplot as plt
 import numpy as np
 
-# ==========================
-# Data
-# ==========================
-
+# DATA
 # Dispatchable technologies
 techs = ["Gas", "Coal", "Peaker"]
 
@@ -48,9 +45,9 @@ S = {
 # Duration of each time-step (h)
 Delta = 1.0
 
-# ==========================
-# Model
-# ==========================
+
+
+# MODEL
 
 m = Model("multi_period_dispatch")
 
@@ -88,10 +85,8 @@ if status not in ["optimal", "bestsollimit"]:
 obj = m.getObjVal()
 print(f"Total generation cost: {obj:.2f} €")
 
-# ==========================
-# Extract solution
-# ==========================
 
+# SOLUTION
 gen = {i: [] for i in techs}
 pv_used = []
 
@@ -105,10 +100,9 @@ pv_used = np.array(pv_used)
 demand = np.array([D[t] for t in T])
 solar_forecast = np.array([S[t] for t in T])
 
-# ==========================
-# Visualization: Energy dispatch
-# ==========================
 
+
+# VISUALIZATION
 fig, ax = plt.subplots(figsize=(10, 5))
 
 ax.stackplot(
@@ -138,7 +132,7 @@ plt.tight_layout()
 plt.show()
 
 
-# Energy mix
+# MIX
 # Total energy (MWh)
 energy_gas    = gen_arrays["Gas"].sum()    * Delta
 energy_coal   = gen_arrays["Coal"].sum()   * Delta

@@ -2,9 +2,8 @@ from pyscipopt import Model, quicksum
 import matplotlib.pyplot as plt
 import numpy as np
 
-# ==========================
-# Data
-# ==========================
+
+# DATA
 
 techs = ["Gas", "Coal", "Peaker"]
 
@@ -54,9 +53,8 @@ eta_ch  = 0.95
 eta_dis = 0.95    
 x_init  = 100.0   # MWh
 
-# ==========================
-# Model
-# ==========================
+
+# MODEL
 
 m = Model("multi_period_dispatch_battery")
 
@@ -106,10 +104,8 @@ m.optimize()
 print("SCIP status:", m.getStatus())
 print(f"Total generation cost: {m.getObjVal():.2f} €")
 
-# ==========================
-# Extract solution
-# ==========================
 
+# SOLUTION
 gen = {i: [] for i in techs}
 pv_used = []
 batt_ch = []
@@ -137,9 +133,7 @@ demand_plus_ch = demand + batt_ch
 
 
 
-# ==========================
-# Visualization
-# ==========================
+# VISUALIZATION
 
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
 

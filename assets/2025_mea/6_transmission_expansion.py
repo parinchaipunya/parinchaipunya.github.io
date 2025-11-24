@@ -2,10 +2,8 @@ from pyscipopt import Model, quicksum
 import matplotlib.pyplot as plt
 import networkx as nx
 
-# ============================================
-# Data
-# ============================================
 
+# DATA
 # Buses
 N = [1, 2, 3, 4, 5, 6, 7, 8]
 
@@ -71,10 +69,7 @@ Lex_index   = list(range(len(L_ex)))
 Lcand_index = list(range(len(L_cand)))
 
 
-# ============================================
-# Model
-# ============================================
-
+# MODEL
 m = Model("TransmissionExpansion_DC_quadratic_shedding")
 
 # Voltage angles θ_i (rad)
@@ -95,7 +90,6 @@ aux = {i: m.addVar(vtype="C", lb=0.0, name=f"aux_{i}") for i in N}
 # Investment binaries
 inv = {k: m.addVar(vtype="B", name=f"inv_{k}") for k in Lcand_index}
 
-# --------- Constraints ---------
 
 # DC flow on existing lines
 for ell, (i, j, F, B) in enumerate(L_ex):
@@ -156,12 +150,9 @@ obj = quicksum(
 m.setObjective(obj, "minimize")
 
 
-# ============================================
-# Solve and report
-# ============================================
+# SOLUTION
 
 m.optimize()
-
 status = m.getStatus()
 print("SCIP status:", status)
 if status not in ["optimal", "bestsollimit"]:
@@ -209,11 +200,7 @@ print(f"Quadratic shedding cost = {shedding_cost:12.4f}")
 print(f"Total objective value = {m.getObjVal():12.4f}")
 
 
-# ============================================
-# Visualization: digraph before / after
-# ============================================
-
-
+# VISUALIZATION
 # Much better geometry — reduces edge overlap
 pos = {
     # Load buses (top arc)
@@ -244,9 +231,7 @@ def add_flow_edge(G, i, j, flow, etype):
         G.add_edge(j, i, flow=-flow, type=etype)
 
 
-# ============================================
-# BEFORE GRAPH (existing lines only)
-# ============================================
+
 G_before = nx.DiGraph()
 G_before.add_nodes_from(N)
 
@@ -271,9 +256,6 @@ plt.title("Before (existing network)")
 plt.axis("off")
 
 
-# ============================================
-# AFTER GRAPH (existing + built + unbuilt candidates)
-# ============================================
 G_after = nx.DiGraph()
 G_after.add_nodes_from(N)
 
