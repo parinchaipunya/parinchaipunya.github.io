@@ -60,8 +60,19 @@ Mathematics of uncertainty. Probability and random variables. Law of large numbe
 [Slides 3]({{ site.baseurl }}/assets/2025_mea/optim_part3.pdf)
 [Slides 4]({{ site.baseurl }}/assets/2025_mea/optim_part4.pdf)
 
+
 #### Afternoon (12h30--15h30)
 Modeling session
+
+### (Optional) Sample codes
+<a href="https://parinchaipunya.com/assets/2025_mea/1_first_example.ipynb" download>Pyscipopt introduction (1)</a> \|
+<a href="https://parinchaipunya.com/assets/2025_mea/2_second_example.ipynb" download>Pyscipopt introduction (2)</a> \|
+<a href="https://parinchaipunya.com/assets/2025_mea/3_econ_dispatch_single.py" download>Economic dispatch --- Single time-step</a> \|
+<a href="https://parinchaipunya.com/assets/2025_mea/4_econ_dispatch_multi_indep.py" download>Economic dispatch --- Multiple time-steps, without battery</a> \|
+<a href="https://parinchaipunya.com/assets/2025_mea/5_econ_dispatch_multi_dynam.py" download>Economic dispatch --- Multiple time-steps, with battery</a> \|
+<a href="https://parinchaipunya.com/assets/2025_mea/6_transmission_expansion.py" download>Transmission extension</a> \|
+<a href="https://parinchaipunya.com/assets/2025_mea/7_econ_dispatch_stoc.py" download>Economic dispatch --- Single time-step, with random demand</a> \|
+
 
 ## Week 2 (Stochastic optimization. Part I)
 Lecturers: Michel De Lara, Parin Chaipunya
