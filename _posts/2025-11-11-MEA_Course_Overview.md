@@ -44,7 +44,10 @@ Lecturer: Parin Chaipunya
 ### Monday 17 November 2025
 
 #### Morning (08h30--11h30)
-Introduction to optimization. Local and global solutions. Linear and quadratic programs. Convexity. Deterministic modeling of economic dispatch in single and multiple time-steps. Deterministic modeling of transmission expansion.
+This course introduces the foundations of optimization, emphasizing how decision variables, objectives, and constraints are formulated. 
+We discuss local and global solutions, highlighting why this distinction matters in nonconvex problems. 
+Core problem classes such as linear, quadratic and convex programs are presented as practical and widely used models.
+We then illustrate these ideas through deterministic models in power systems: economic dispatch in single and multiple time-step settings, and transmission expansion planning which help improve network capabilities under the balance of investment and load shedding.
 
 [Slides 1]({{ site.baseurl }}/assets/2025_mea/optim_part1.pdf)
 [Slides 2]({{ site.baseurl }}/assets/2025_mea/optim_part2.pdf)
@@ -55,7 +58,12 @@ Modeling session
 ### Thursday 20 November 2025
 
 #### Morning (08h30--11h30)
-Mathematics of uncertainty. Probability and random variables. Law of large numbers. A simple stochastic optimization. Blood testing problem. News boy problem. Stochastic economic dispatch in single-timestep.
+We introduce the mathematics of uncertainty through the basic elements of probability and random variables, emphasizing how unpredictable phenomena can be represented, quantified, and incorporated into decision models. 
+Building on these foundations, we introduce different approaches to handle randomness in an optimization problem with an emphasis on stochastic optimization.
+We then consider examples including pooled blood testing and the newsboy problems.
+Finally, we modify the economic dispatch problem by replacing the deterministic expected demand with a random variable describing the uncertain demand.
+We discuss in this part the need to introduce the recourse variable to fix the feasibility issue caused by replacing the deterministic demand constraint with a stochastic one.
+A Monte Carlo simulation illustrates that the stochastic solution produces less accumulated cost compared to the deterministic sample-averaged approximation approach.
 
 [Slides 3]({{ site.baseurl }}/assets/2025_mea/optim_part3.pdf)
 [Slides 4]({{ site.baseurl }}/assets/2025_mea/optim_part4.pdf)
