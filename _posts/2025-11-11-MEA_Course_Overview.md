@@ -75,11 +75,12 @@ Modeling session
 ### (Optional) Sample codes
 <a href="https://parinchaipunya.com/assets/2025_mea/1_first_example.ipynb" download>Pyscipopt introduction (1)</a> \|
 <a href="https://parinchaipunya.com/assets/2025_mea/2_second_example.ipynb" download>Pyscipopt introduction (2)</a> \|
+
 <a href="https://parinchaipunya.com/assets/2025_mea/3_econ_dispatch_single.py" download>Economic dispatch --- Single time-step</a> \|
 <a href="https://parinchaipunya.com/assets/2025_mea/4_econ_dispatch_multi_indep.py" download>Economic dispatch --- Multiple time-steps, without battery</a> \|
 <a href="https://parinchaipunya.com/assets/2025_mea/5_econ_dispatch_multi_dynam.py" download>Economic dispatch --- Multiple time-steps, with battery</a> \|
 <a href="https://parinchaipunya.com/assets/2025_mea/6_transmission_expansion.py" download>Transmission extension</a> \|
-<a href="https://parinchaipunya.com/assets/2025_mea/7_econ_dispatch_stoc.py" download>Economic dispatch --- Single time-step, with random demand</a> \|
+<a href="https://parinchaipunya.com/assets/2025_mea/7_econ_dispatch_stoc.py" download>Economic dispatch --- Single time-step, with random demand</a>
 
 
 ## Week 2 (Stochastic optimization. Part I)
