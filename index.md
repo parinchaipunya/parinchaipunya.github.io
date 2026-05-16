@@ -24,8 +24,10 @@ Optimization (Theory and Modeling), Bilevel optimization, Nash equilibrium, Game
 
 ## News
 
-- Upcoming workshop on "Game Theory with Information" at KMUTT during December 17--18, 2025.
-- My lecture note [Linear Algebra for Engineers]({{site.url}}/assets/pdfs/note-linear-alg.pdf) is updated.
+- [May 2026] We are preparing to organize, at KMUTT, The International Conference on Nonlinear Applied Analysis and Optimization in December 2026!!!
+- [May 2026] Many slides [Optimization]({{ site.url}}{% link _posts/2022-08-01-optim.md %}) were updated.
+- [Dec 2025] Upcoming workshop on "Game Theory with Information" at KMUTT during December 17--18, 2025.
+- [Nov 2025] My lecture note [Linear Algebra for Engineers]({{site.url}}/assets/pdfs/note-linear-alg.pdf) was updated.
 
 ### I have new preprints available:
 
