@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ND Filter Shutter Speed Calculator</title>
+    <title>ND Filter Compensation Calculator</title>
     <style>
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -63,92 +63,112 @@ body {
       <h1>ND Filter Calculator</h1>
 
       <div class="input-group">
-        <label for="shutterSpeed">Base Shutter Speed (seconds or fraction e.g., 1/250 or 0.5):</label>
+        <label for="shutterSpeed">Base shutter speed (Seconds):</label>
         <input type="text" id="shutterSpeed" placeholder="e.g., 1/125 or 2">
       </div>
 
       <div class="input-group">
-        <label for="ndStops">ND Filter Strength (Stops):</label>
+        <label for="ndStops">ND filter strength (Stops):</label>
         <input type="number" id="ndStops" placeholder="e.g., 6 or 10" min="1" max="20">
       </div>
 
-      <button onclick="calculateShutterSpeed()">Calculate New Speed</button>
+      <button onclick="calculateShutterSpeed()">Calculate compensation</button>
 
       <div id="result" style="display: none;"></div>
     </div>
 
-    <script>
-      // Standard photographic full-stop shutter speeds
-      const standardSpeeds = [
-        1/8000, 1/4000, 1/2000, 1/1000, 1/500, 1/250, 1/125, 1/60, 1/30, 1/15, 1/8, 1/4, 1/2, 
-        1, 2, 4, 8, 15, 30, 60, 120, 240, 480, 960
-      ];
+  </body><script>
+  // Standard 1/3 stop shutter speed scale used by modern cameras
+  const standardSpeeds = [
+    1/8000, 1/6400, 1/5000, 1/4000, 1/3200, 1/2500, 1/2000, 1/1600, 1/1250,
+    1/1000, 1/800, 1/640, 1/500, 1/400, 1/320, 1/250, 1/200, 1/160,
+    1/125, 1/100, 1/80, 1/60, 1/50, 1/40, 1/30, 1/25, 1/20,
+    1/15, 1/13, 1/10, 1/8, 1/6, 1/5, 1/4, 1/3, 0.4,
+    0.5, 0.6, 0.8, 1, 1.3, 1.6, 2, 2.5, 3.2,
+    4, 5, 6, 8, 10, 13, 15, 20, 25, 30
+  ];
 
-      function parseShutterSpeed(input) {
-        if (input.includes('/')) {
-          const parts = input.split('/');
-          if (parts.length === 2) {
-            const numerator = parseFloat(parts[0]);
-            const denominator = parseFloat(parts[1]);
-            if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
-              return numerator / denominator;
-            }
-          }
-        }
-        return parseFloat(input);
-      }
-
-      function findClosestCameraSpeed(targetSeconds) {
-        // Find the closest standard speed in our photography array
-        let closest = standardSpeeds[0];
-        let minDifference = Math.abs(targetSeconds - closest);
-
-        for (let i = 1; i < standardSpeeds.length; i++) {
-          let difference = Math.abs(targetSeconds - standardSpeeds[i]);
-          if (difference < minDifference) {
-            minDifference = difference;
-            closest = standardSpeeds[i];
-          }
-        }
-        return closest;
-      }
-
-      function formatResult(seconds) {
-        if (seconds >= 1) {
-          return seconds + " seconds";
-        } else {
-          const denominator = Math.round(1 / seconds);
-          return `1/${denominator} seconds`;
+  function parseShutterSpeed(input) {
+    if (input.includes('/')) {
+      const parts = input.split('/');
+      if (parts.length === 2) {
+        const numerator = parseFloat(parts[0]);
+        const denominator = parseFloat(parts[1]);
+        if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+          return numerator / denominator;
         }
       }
+    }
+    return parseFloat(input);
+  }
 
-      function calculateShutterSpeed() {
-        const rawSpeed = document.getElementById('shutterSpeed').value.trim();
-        const stops = parseFloat(document.getElementById('ndStops').value);
-        const resultDiv = document.getElementById('result');
+  function findClosestCameraSpeed(targetSeconds) {
+    // If it's longer than 30 seconds, cameras usually revert to full seconds or bulb mode multipliers
+    if (targetSeconds > 30) {
+      if (targetSeconds >= 55 && targetSeconds <= 65) return 60; // 1 minute
+      if (targetSeconds >= 110 && targetSeconds <= 130) return 120; // 2 minutes
+      if (targetSeconds >= 230 && targetSeconds <= 250) return 240; // 4 minutes
+      return Math.round(targetSeconds); 
+    }
 
-        const baseSpeed = parseShutterSpeed(rawSpeed);
+    // Find the closest standard 1/3 stop speed
+    let closest = standardSpeeds[0];
+    let minDifference = Math.abs(targetSeconds - closest);
 
-        if (isNaN(baseSpeed) || isNaN(stops) || baseSpeed <= 0 || stops < 0) {
-          resultDiv.style.display = 'block';
-          resultDiv.style.color = '#dc3545';
-          resultDiv.innerText = "Please enter valid numbers.";
-          return;
-        }
+    for (let i = 1; i < standardSpeeds.length; i++) {
+      let difference = Math.abs(targetSeconds - standardSpeeds[i]);
+      if (difference < minDifference) {
+        minDifference = difference;
+        closest = standardSpeeds[i];
+      }
+    }
+    return closest;
+  }
 
-        // 1. Calculate the exact theoretical speed
-        const theoreticalSpeed = baseSpeed * Math.pow(2, stops);
+  function formatResult(seconds) {
+    if (seconds >= 60) {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = Math.round(seconds % 60);
+      return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes} minute(s)`;
+    }
 
-        // 2. Snap it to the nearest standard photography speed
-        const actualCameraSpeed = findClosestCameraSpeed(theoreticalSpeed);
+    if (seconds >= 1) {
+      // Match standard camera displays (decimal for 1.3, 1.6, etc., or whole integers)
+      return seconds % 1 === 0 ? seconds + "s" : seconds.toFixed(1) + "s";
+    } else {
+      // Handle fractional display cleanly
+      const denominator = Math.round(1 / seconds);
+      if (denominator === 1) return "1s";
+      return `1/${denominator}s`;
+    }
+  }
 
-        resultDiv.style.display = 'block';
-        resultDiv.style.color = '#333';
-        resultDiv.innerHTML = `
-        Theoretical: ${theoreticalSpeed.toFixed(1)}s<br>
-        <strong>Camera Setting: ${formatResult(actualCameraSpeed)}</strong>
+  function calculateShutterSpeed() {
+    const rawSpeed = document.getElementById('shutterSpeed').value.trim();
+    const stops = parseFloat(document.getElementById('ndStops').value);
+    const resultDiv = document.getElementById('result');
+
+    const baseSpeed = parseShutterSpeed(rawSpeed);
+
+    if (isNaN(baseSpeed) || isNaN(stops) || baseSpeed <= 0 || stops < 0) {
+      resultDiv.style.display = 'block';
+      resultDiv.style.color = '#dc3545';
+      resultDiv.innerText = "Please enter valid numbers.";
+      return;
+    }
+
+    // Exact math calculation
+    const theoreticalSpeed = baseSpeed * Math.pow(2, stops);
+
+    // Snap to standard 1/3 camera stop
+    const actualCameraSpeed = findClosestCameraSpeed(theoreticalSpeed);
+
+    resultDiv.style.display = 'block';
+    resultDiv.style.color = '#333';
+    resultDiv.innerHTML = `
+        <span style="font-size: 0.9rem; color: #666;">Exact Math: ${theoreticalSpeed.toFixed(2)}s</span><br>
+        <span style="font-size: 1.4rem;">Camera Setting: <strong>${formatResult(actualCameraSpeed)}</strong></span>
     `;
-      }
-    </script>
-  </body>
+  }
+</script>
 </html>
