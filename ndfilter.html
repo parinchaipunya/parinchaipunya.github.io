@@ -23,31 +23,74 @@
             max-width: 400px;
             width: 100%;
         }
-        h1 { font-size: 1.5rem; margin-bottom: 20px; text-align: center; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        h1 { font-size: 1.5rem; margin-bottom: 25px; text-align: center; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
         input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ccc;
             border-radius: 6px;
             box-sizing: border-box;
             font-size: 1rem;
         }
+        
+        /* Premium Toggle Switch Styling */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #e9ecef;
+            padding: 5px;
+            border-radius: 30px;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+        }
+        .toggle-option {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 0.9rem;
+            font-weight: bold;
+            z-index: 2;
+            color: #666;
+            transition: color 0.25s ease;
+        }
+        .toggle-option.active {
+            color: white;
+        }
+        .toggle-slider {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: calc(50% - 5px);
+            height: calc(100% - 10px);
+            background: #007bff;
+            border-radius: 25px;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+        /* Mode switching state class */
+        .container.mode-backward .toggle-slider {
+            transform: translateX(100%);
+        }
+
         button {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 6px;
             font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
         }
         button:hover { background-color: #0056b3; }
         #result {
-            margin-top: 20px;
+            margin-top: 25px;
             padding: 15px;
             background: #e9ecef;
             border-radius: 6px;
@@ -59,11 +102,20 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="calcContainer">
     <h1>ND Filter Calculator</h1>
     
     <div class="input-group">
-        <label for="shutterSpeed">Base shutter speed:</label>
+        <label>Calculation Mode:</label>
+        <div class="toggle-container" onclick="toggleMode()">
+            <div class="toggle-slider"></div>
+            <div id="optForward" class="toggle-option active">Find Filtered Speed</div>
+            <div id="optBackward" class="toggle-option">Find Base Speed</div>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label id="speedLabel" for="shutterSpeed">Base shutter speed (without ND):</label>
         <input type="text" id="shutterSpeed" placeholder="e.g., 1/1000, 1/125, 0.4, or 8">
     </div>
     
@@ -72,39 +124,62 @@
         <input type="number" id="ndStops" placeholder="e.g., 10 or 15" step="0.33" min="0">
     </div>
     
-    <button onclick="calculateCompensation()">Calculate compensation</button>
+    <button onclick="calculateCompensation()">Calculate</button>
     
     <div id="result" style="display: none;"></div>
 </div>
 
 <script>
-// Comprehensive list of standard 1/3-stop camera speeds from 1/8000s up to 60m
+// Keep track of state: 'forward' or 'backward'
+let currentMode = 'forward';
+
 const standardSpeeds = [
-    // Fractions of a second
     "1/8000", "1/6400", "1/5000", "1/4000", "1/3200", "1/2500", "1/2000", "1/1600", "1/1250",
     "1/1000", "1/800", "1/640", "1/500", "1/400", "1/320", "1/250", "1/200", "1/160",
     "1/125", "1/100", "1/80", "1/60", "1/50", "1/40", "1/30", "1/25", "1/20",
     "1/15", "1/13", "1/10", "1/8", "1/6", "1/5", "1/4", "1/3", "0.4", "0.5", "0.6", "0.8",
-    // Seconds
     "1s", "1.3s", "1.6s", "2s", "2.5s", "3.2s", "4s", "5s", "6s", "8s", "10s", "13s", "15s", "20s", "25s", "30s",
-    // Long exposure standard steps (Bulb mode equivalents in 1/3 stops)
     "40s", "50s", "1m", "1m 15s", "1m 40s", "2m", "2m 30s", "3m 15s", "4m", "5m", "6m 30s", "8m", 
     "10m", "13m", "15m", "20m", "25m", "30m", "40m", "50m", "60m"
 ];
 
-// Helper to check for variations in user input style and normalize them to match our array entries
-function normalizeInput(input) {
-    let clean = input.trim().toLowerCase().replace(/s$/, ""); // strip out 's' if typed (e.g. 8s -> 8)
-    
-    // Normalize simple fractions if typed with spaces
-    clean = clean.replace(/\s+/g, "");
+function toggleMode() {
+    const container = document.getElementById('calcContainer');
+    const optForward = document.getElementById('optForward');
+    const optBackward = document.getElementById('optBackward');
+    const speedLabel = document.getElementById('speedLabel');
+    const speedInput = document.getElementById('shutterSpeed');
 
-    // If they typed something like "1", match it with our array style "1s"
+    // Swap state
+    if (currentMode === 'forward') {
+        currentMode = 'backward';
+        container.classList.add('mode-backward');
+        optForward.classList.remove('active');
+        optBackward.classList.add('active');
+        
+        speedLabel.innerText = "Target exposure time (with ND):";
+        speedInput.placeholder = "e.g., 30s, 2m, or 15m";
+    } else {
+        currentMode = 'forward';
+        container.classList.remove('mode-backward');
+        optForward.classList.add('active');
+        optBackward.classList.remove('active');
+        
+        speedLabel.innerText = "Base shutter speed (without ND):";
+        speedInput.placeholder = "e.g., 1/1000, 1/125, 0.4, or 8";
+    }
+    
+    // Reset output text
+    document.getElementById('result').style.display = 'none';
+}
+
+function normalizeInput(input) {
+    let clean = input.trim().toLowerCase().replace(/\s+/g, "");
     if (clean === "1") return "1s";
     
-    // Check if it matches exactly as a string or needs a suffix
     for (let speed of standardSpeeds) {
-        if (speed === clean || speed === clean + "s") {
+        let speedClean = speed.toLowerCase().replace(/\s+/g, "");
+        if (speedClean === clean || speedClean === clean + "s" || speedClean.replace(/s$/, "") === clean) {
             return speed;
         }
     }
@@ -119,14 +194,12 @@ function calculateCompensation() {
     resultDiv.style.display = 'block';
     resultDiv.style.color = '#333';
 
-    // 1. Validate ND Stop Input
     if (isNaN(stops) || stops < 0) {
         resultDiv.style.color = '#dc3545';
         resultDiv.innerText = "Please enter a valid ND stop value.";
         return;
     }
 
-    // 2. Locate the input in our strict standard array
     const normalizedSpeed = normalizeInput(rawInput);
     const currentIndex = standardSpeeds.indexOf(normalizedSpeed);
 
@@ -136,19 +209,25 @@ function calculateCompensation() {
         return;
     }
 
-    // 3. Shift the index based on ND Filter Stops
-    // Since our array is built in 1/3 increments, 1 full stop = 3 index shifts
     const indexShift = Math.round(stops * 3);
-    const targetIndex = currentIndex + indexShift;
+    let targetIndex;
 
-    // 4. Boundary Check
-    if (targetIndex >= standardSpeeds.length) {
-        resultDiv.style.color = '#dc3545';
-        resultDiv.innerText = "Compensation longer than 60m is not supported!";
-        return;
+    if (currentMode === 'forward') {
+        targetIndex = currentIndex + indexShift;
+        if (targetIndex >= standardSpeeds.length) {
+            resultDiv.style.color = '#dc3545';
+            resultDiv.innerText = "Compensation longer than 60m is not supported!";
+            return;
+        }
+    } else {
+        targetIndex = currentIndex - indexShift;
+        if (targetIndex < 0) {
+            resultDiv.style.color = '#dc3545';
+            resultDiv.innerText = "Required base shutter speed is faster than 1/8000s!";
+            return;
+        }
     }
 
-    // 5. Output Result
     const finalCameraSetting = standardSpeeds[targetIndex];
     resultDiv.innerHTML = `Camera Setting: <strong>${finalCameraSetting}</strong>`;
 }
