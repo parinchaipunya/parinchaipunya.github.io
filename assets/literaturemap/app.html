@@ -187,7 +187,7 @@
   const FIELDS = 'id,doi,display_name,publication_year,cited_by_count,authorships,primary_location,referenced_works,related_works,abstract_inverted_index,type';
   const COLORS = ['#f4f4f6', '#a78bfa', '#60a5fa', '#34d399', '#fbbf24', '#fb7185'];
   const RING = 150;
-  const TIER = 210, SLOT = 30;   // tree layout: vertical gap between layers, horizontal gap between papers
+  const TIER = 280, SLOT = 24;   // tree layout: horizontal gap between layers, vertical gap between papers
   const $ = s => document.querySelector(s);
   const color = L => COLORS[Math.min(L, COLORS.length - 1)];
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -501,27 +501,30 @@
     .force('charge', d3.forceManyBody().strength(d => d.isTopic ? 0 : -140).distanceMax(1200))
     .force('collide', d3.forceCollide(d => radius(d) + 3))
     .force('radial', d3.forceRadial(d => d.layer * RING, 0, 0).strength(0.8))
-    .force('tx', d3.forceX(d => d.tx || 0).strength(0))
-    .force('ty', d3.forceY(d => d.layer * TIER).strength(0))
+    .force('tx', d3.forceX(d => d.layer * TIER).strength(0))
+    .force('ty', d3.forceY(d => d.tp || 0).strength(0))
     .alphaDecay(0.02)
     .on('tick', ticked);
 
   const isTree = () => $('#layout').value === 'tree';
 
-  // Tree layout: each layer is a row; papers in a row are ordered by the mean
-  // position of their parents in the row above, so links mostly run straight down.
+  // Tree layout (left to right): each layer is a column; papers in a column are ordered by
+  // the mean position of their parents in the column to the left, so links mostly run straight across.
   function treeTargets() {
     const byLayer = d3.groups([...state.nodes.values()].filter(n => !n.isTopic), d => d.layer)
       .sort((a, b) => a[0] - b[0]);
     const topic = state.nodes.get('TOPIC');
-    if (topic) topic.tx = 0;
+    if (topic) topic.tp = 0;
     for (const [L, row] of byLayer) {
       const key = n => {
-        const ps = [...(adj.get(n.id) || [])].map(id => state.nodes.get(id)).filter(p => p && p.layer < L && p.tx != null);
-        return ps.length ? d3.mean(ps, p => p.tx) : (n.tx ?? n.x ?? 0);
+        const ps = [...(adj.get(n.id) || [])].map(id => state.nodes.get(id)).filter(p => p && p.layer < L && p.tp != null);
+        return ps.length ? d3.mean(ps, p => p.tp) : (n.tp ?? n.y ?? 0);
       };
       row.map(n => ({ n, k: key(n) })).sort((a, b) => a.k - b.k || b.n.cites - a.n.cites)
-        .forEach(({ n }, i) => { n.tx = (i - (row.length - 1) / 2) * SLOT; });
+        .forEach(({ n }, i) => {
+          n.tp = (i - (row.length - 1) / 2) * SLOT;
+          if (!n.seen) { n.x = L * TIER; n.y = n.tp; }   // new papers start in their slot
+        });
     }
   }
 
@@ -530,14 +533,16 @@
     if (tree) treeTargets();
     const guides = $('#rings').checked;
     sim.force('radial').strength(tree ? 0 : guides ? 0.8 : 0.02);
-    sim.force('tx').strength(tree ? 0.35 : 0);
-    sim.force('ty').strength(tree ? (guides ? 1 : 0.1) : 0);
+    sim.force('tx').strength(tree ? (guides ? 1 : 0.1) : 0);
+    sim.force('ty').strength(tree ? 0.6 : 0);
     sim.force('charge').strength(d => d.isTopic ? 0 : tree ? -30 : -140);
     sim.force('link').distance(l => l.kind === 'topic' ? (tree ? TIER : RING) : 45)
       .strength(l => l.kind === 'topic' ? 0.03 : (tree ? 0.05 : 0.25) / Math.max(1, Math.min(deg(l.source), deg(l.target))));
-    $('#ringsTxt').textContent = tree ? 'Rows' : 'Rings';
+    $('#ringsTxt').textContent = tree ? 'Columns' : 'Rings';
     labelSel.attr('text-anchor', d => d.isTopic ? 'middle' : 'start');
+    for (const n of state.nodes.values()) n.seen = true;
     drawRings();
+    updateLabels();
     if (kick) sim.alpha(0.9).restart();
   }
 
@@ -545,15 +550,8 @@
     linkSel.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
       .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
     nodeSel.attr('cx', d => d.x).attr('cy', d => d.y);
-    if (isTree()) {
-      labelSel.attr('x', d => d.isTopic ? d.x : d.x + radius(d) + 2)
-        .attr('y', d => d.isTopic ? d.y - 22 : d.y + 3.5)
-        .attr('transform', d => d.isTopic ? null : `rotate(55 ${d.x} ${d.y})`);
-    } else {
-      labelSel.attr('x', d => d.isTopic ? d.x : d.x + radius(d) + 3)
-        .attr('y', d => d.isTopic ? d.y - 22 : d.y + 3.5)
-        .attr('transform', null);
-    }
+    labelSel.attr('x', d => d.isTopic ? d.x : d.x + radius(d) + 3)
+      .attr('y', d => d.isTopic ? d.y - 22 : d.y + 3.5);
   }
 
   const drag = d3.drag()
@@ -618,13 +616,13 @@
     const data = show ? d3.range(1, maxL + 1) : [];
     const tree = isTree();
     ringG.selectAll('circle').data(tree ? [] : data).join('circle').attr('class', 'ring').attr('r', d => d * RING);
-    const xs = [...state.nodes.values()].map(d => d.tx || 0);
-    const x0 = (d3.min(xs) || 0) - 60, x1 = (d3.max(xs) || 0) + 60;
+    const ps = [...state.nodes.values()].map(d => d.tp || 0);
+    const y0 = (d3.min(ps) || 0) - 40, y1 = (d3.max(ps) || 0) + 40;
     ringG.selectAll('line').data(tree ? data : []).join('line').attr('class', 'guide')
-      .attr('x1', x0).attr('x2', x1).attr('y1', d => d * TIER).attr('y2', d => d * TIER);
+      .attr('y1', y0).attr('y2', y1).attr('x1', d => d * TIER).attr('x2', d => d * TIER);
     ringG.selectAll('text').data(data).join('text').attr('class', 'ringlabel')
-      .attr('x', tree ? x0 - 8 : 0).attr('y', d => tree ? d * TIER + 4 : -d * RING - 6)
-      .attr('text-anchor', tree ? 'end' : 'middle').text(d => `layer ${d}`);
+      .attr('x', d => tree ? d * TIER : 0).attr('y', d => tree ? y0 - 8 : -d * RING - 6)
+      .attr('text-anchor', 'middle').text(d => `layer ${d}`);
   }
 
   function applyHighlight() {
@@ -639,17 +637,17 @@
 
   function updateLabels() {
     labelSel.style('display', d =>
-      (d.layer <= 1 || zoomK >= 1.6 || (focusSet && focusSet.has(d.id))) ? null : 'none');
+      (d.layer <= 1 || isTree() || zoomK >= 1.6 || (focusSet && focusSet.has(d.id))) ? null : 'none');
   }
 
   function fit(animate) {
     const nodes = [...state.nodes.values()];
     if (!nodes.length) return;
     const { width, height } = svg.node().getBoundingClientRect();
-    // in tree mode frame the rows themselves (plus room for slanted labels), not nodes still settling
+    // in tree mode frame the columns themselves (plus room for labels), not nodes still settling
     const tree = isTree();
-    const xs = nodes.map(d => tree ? (d.tx || 0) : d.x), ys = nodes.map(d => tree ? d.layer * TIER : d.y);
-    const x0 = Math.min(...xs), x1 = Math.max(...xs) + (tree ? 80 : 0), y0 = Math.min(...ys) - (tree ? 30 : 0), y1 = Math.max(...ys) + (tree ? 120 : 0);
+    const xs = nodes.map(d => tree ? d.layer * TIER : d.x), ys = nodes.map(d => tree ? (d.tp || 0) : d.y);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs) + (tree ? 200 : 0), y0 = Math.min(...ys) - (tree ? 50 : 0), y1 = Math.max(...ys);
     const k = Math.min(2, 0.9 * Math.min(width / (x1 - x0 + 120), height / (y1 - y0 + 120)));
     const t = d3.zoomIdentity.translate(width / 2 - k * (x0 + x1) / 2, height / 2 - k * (y0 + y1) / 2).scale(k);
     (animate ? svg.transition().duration(600) : svg).call(zoom.transform, t);
@@ -724,7 +722,7 @@
   function showHelp() {
     $('#details').innerHTML = `<div class="help">
       <h2>How to read the map</h2>
-      <p>The white node in the centre is your topic. Each ring outward is a layer (switch <b>Layout</b> to <b>Tree</b> to show the layers as rows, top to bottom):</p>
+      <p>The white node in the centre is your topic. Each ring outward is a layer (switch <b>Layout</b> to <b>Tree</b> to show the layers as columns, left to right):</p>
       <ul>
         <li><b>Layer 1</b> – papers that match your keywords.</li>
         <li><b>Layer 2</b> – papers cited by, citing, or related to layer 1. Papers that connect to several layer‑1 papers are preferred.</li>
