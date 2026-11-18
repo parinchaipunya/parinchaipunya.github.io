@@ -52,3 +52,4 @@ Optimization (Theory and Modeling), Bilevel optimization, Nash equilibrium, Game
 - [Linear Algebra]({{ site.url }}{% link _posts/2022-08-03-linalg.md %})
 - [Probability Theory (Undergraduate first course)]({{ site.url }}{% link _posts/2025-01-05-proba.md %})
 - [Convex Analysis in Geodesic Spaces]({{ site.url}}{% link _posts/2022-01-05-geodesic-convex-analysis.md %})
+- [Literature Map]({{ site.url }}/literaturemap.html)

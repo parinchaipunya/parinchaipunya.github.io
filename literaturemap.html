@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Literature Map</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  :root {
+    --bg: #1b1b1f; --panel: #232328; --line: #34343b; --text: #dcdce0; --muted: #8b8b94;
+    --accent: #a78bfa;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    display: grid; grid-template-rows: auto 1fr; height: 100vh;
+    background: var(--bg); color: var(--text);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  header { padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  .bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .brand { font-weight: 650; letter-spacing: .2px; margin-right: 6px; white-space: nowrap; }
+  .brand span { color: var(--accent); }
+  input, select, button {
+    font: inherit; color: var(--text); background: #2c2c33; border: 1px solid var(--line);
+    border-radius: 6px; padding: 6px 9px;
+  }
+  input:focus, select:focus { outline: 1px solid var(--accent); }
+  #q { flex: 1 1 320px; min-width: 200px; }
+  button { cursor: pointer; }
+  button:hover { border-color: #55555f; }
+  button.primary { background: var(--accent); color: #17131f; border-color: var(--accent); font-weight: 600; }
+  button:disabled { opacity: .5; cursor: default; }
+  details.opts { margin-top: 8px; }
+  details.opts summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 8px 16px; margin-top: 8px; font-size: 13px;
+  }
+  .grid label { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--muted); }
+  .grid input[type=number] { width: 80px; }
+  .grid input[type=text], .grid input[type=password] { width: 150px; }
+  .perlayer { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+  .perlayer label { display: flex; align-items: center; gap: 4px; }
+  .perlayer input { width: 62px; padding: 5px 6px; }
+  .perlayer .dot { width: 8px; height: 8px; }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
+
+  main { display: grid; grid-template-columns: 1fr 380px; min-height: 0; }
+  #graph { position: relative; overflow: hidden; min-height: 0; }
+  #svg { width: 100%; height: 100%; display: block; cursor: grab; }
+  #svg:active { cursor: grabbing; }
+  aside { border-left: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; min-height: 0; }
+  .tabs { display: flex; border-bottom: 1px solid var(--line); }
+  .tabs button { flex: 1; border: 0; border-radius: 0; background: transparent; padding: 10px; color: var(--muted); }
+  .tabs button.on { color: var(--text); box-shadow: inset 0 -2px var(--accent); }
+  .pane { overflow: auto; padding: 14px; flex: 1; display: none; }
+  .pane.on { display: block; }
+
+  .toolbar { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .toolbar button, .toolbar label { font-size: 12px; padding: 4px 8px; background: rgba(35,35,40,.9); }
+  .toolbar label { border: 1px solid var(--line); border-radius: 6px; display: flex; gap: 5px; align-items: center; color: var(--muted); }
+  #legend { position: absolute; bottom: 10px; right: 10px; background: rgba(35,35,40,.9); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--muted); }
+  #legend div { display: flex; align-items: center; gap: 6px; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .ln { display: inline-block; width: 18px; border-top: 1.5px solid #999; }
+  .ln.dash { border-top-style: dashed; }
+  #status { position: absolute; bottom: 10px; left: 10px; font-size: 12px; color: var(--muted); background: rgba(35,35,40,.9); padding: 5px 9px; border-radius: 6px; border: 1px solid var(--line); max-width: 60%; }
+  #status:empty { display: none; }
+  #status.err { color: #fb7185; }
+  #empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--muted); padding: 20px; pointer-events: none; }
+  #empty .ex { pointer-events: auto; color: var(--accent); cursor: pointer; text-decoration: underline dotted; }
+  #tip { position: fixed; pointer-events: none; background: #111114; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font-size: 12px; max-width: 340px; display: none; z-index: 10; }
+
+  .link { stroke: #8a8a96; stroke-opacity: .28; stroke-width: 1; }
+  .link.related { stroke-dasharray: 3 3; }
+  .link.topic { stroke-opacity: .12; }
+  .link.hl { stroke: #e8e8ff; stroke-opacity: .85; stroke-width: 1.4; }
+  .node { stroke: var(--bg); stroke-width: 1.5; cursor: pointer; transition: opacity .15s; }
+  .node.sel { stroke: #fff; stroke-width: 3; }
+  .dim { opacity: .1; }
+  .label { fill: #cfcfd6; font-size: 10px; pointer-events: none; paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
+  .label.topic { font-size: 14px; font-weight: 650; fill: #fff; }
+  .ring { fill: none; stroke: #2e2e35; stroke-dasharray: 4 6; }
+  .ringlabel { fill: #4a4a54; font-size: 11px; }
+
+  h2 { font-size: 16px; margin: 0 0 6px; line-height: 1.35; }
+  h4 { margin: 14px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .meta { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+  .links a { color: var(--accent); margin-right: 12px; font-size: 13px; }
+  .actions { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+  .actions button { font-size: 13px; }
+  details.abs summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  details.abs p { font-size: 13px; color: #c4c4cc; }
+  .item { padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+  .item:hover { background: #2c2c33; }
+  .item .t { font-size: 13px; }
+  .item .m { font-size: 12px; color: var(--muted); }
+  .rel { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: .4px; }
+  #listFilter { width: 100%; margin-bottom: 4px; }
+  .help p { color: #bdbdc6; font-size: 13px; }
+  .help li { color: #bdbdc6; font-size: 13px; margin-bottom: 4px; }
+  footer.src { font-size: 11px; color: var(--muted); padding: 8px 14px; border-top: 1px solid var(--line); }
+  footer.src a { color: var(--muted); }
+
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; grid-template-rows: 62vh auto; }
+    aside { border-left: 0; border-top: 1px solid var(--line); }
+    body { height: auto; min-height: 100vh; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <form class="bar" id="form">
+    <div class="brand">Literature <span>Map</span></div>
+    <input id="q" type="search" placeholder="Keywords or topic, e.g. “optimization in smart-grid management”" autocomplete="off">
+    <label style="color:var(--muted);font-size:13px">Layers
+      <select id="layers">
+        <option value="1">1</option><option value="2">2</option>
+        <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+      </select>
+    </label>
+    <div id="perLayer" class="perlayer" title="How many papers each layer keeps"></div>
+    <button class="primary" id="go" type="submit">Map it</button>
+  </form>
+  <details class="opts">
+    <summary>Options</summary>
+    <div class="grid">
+      <label>Links kept per paper <input id="perNode" type="number" min="1" max="20" value="4"></label>
+      <label>Published from year <input id="fromYear" type="number" min="1800" max="2100" placeholder="any"></label>
+      <label>Layer 1 ranking
+        <select id="seedSort"><option value="relevance">Relevance</option><option value="cites">Most cited</option></select>
+      </label>
+      <label>Follow references <input id="refs" type="checkbox" checked></label>
+      <label>Follow “related works” <input id="related" type="checkbox" checked></label>
+      <label>Follow citing papers (slower) <input id="citing" type="checkbox"></label>
+      <label>Email (optional) <input id="email" type="text" placeholder="you@uni.ac.th"></label>
+      <label>OpenAlex API key (optional) <input id="apikey" type="password"></label>
+    </div>
+    <div class="hint">The numbers next to “Layers” set how many papers each layer keeps (layer 1 can have at most 200). Layer 2 = papers linked to layer 1 (references, citations, related works), ranked by how many layer‑1 papers they connect to, then by citation count. Layer 3 builds on layer 2, and so on. Adding your email or an API key gets more reliable rate limits from OpenAlex. Both are stored only in this browser.</div>
+  </details>
+</header>
+
+<main>
+  <section id="graph">
+    <svg id="svg"></svg>
+    <div class="toolbar">
+      <button id="fit" type="button">Fit</button>
+      <label><input id="rings" type="checkbox" checked> Rings</label>
+      <button id="expJson" type="button">JSON</button>
+      <button id="expCsv" type="button">CSV</button>
+      <button id="expBib" type="button">BibTeX</button>
+    </div>
+    <div id="empty">
+      <div>Type a topic and press <b>Map it</b>.<br><br>
+        Try: <span class="ex">Wasserstein gradient flows</span> · <span class="ex">bilevel optimization demand response</span> · <span class="ex">generalized Nash equilibrium</span>
+      </div>
+    </div>
+    <div id="legend" hidden></div>
+    <div id="status"></div>
+  </section>
+  <aside>
+    <div class="tabs">
+      <button class="on" data-tab="details" type="button">Details</button>
+      <button data-tab="list" type="button">All papers</button>
+    </div>
+    <div class="pane on" id="details"></div>
+    <div class="pane" id="list">
+      <input id="listFilter" type="search" placeholder="Filter by title or author…">
+      <div id="listBody"></div>
+    </div>
+    <footer class="src">Data: <a href="https://openalex.org" target="_blank" rel="noopener">OpenAlex</a> (CC0). Scholar links open a Google Scholar search for the title.</footer>
+  </aside>
+</main>
+<div id="tip"></div>
+
+<script>
+(() => {
+  'use strict';
+  const API = 'https://api.openalex.org';
+  const FIELDS = 'id,doi,display_name,publication_year,cited_by_count,authorships,primary_location,referenced_works,related_works,abstract_inverted_index,type';
+  const COLORS = ['#f4f4f6', '#a78bfa', '#60a5fa', '#34d399', '#fbbf24', '#fb7185'];
+  const RING = 150;
+  const $ = s => document.querySelector(s);
+  const color = L => COLORS[Math.min(L, COLORS.length - 1)];
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const short = id => id ? id.replace('https://openalex.org/', '') : id;
+  const sid = x => (x && typeof x === 'object') ? x.id : x;
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const store = {
+    get(k, d = '') { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+  };
+
+  // ---------- state ----------
+  let state = freshState();
+  let runId = 0;
+  let hoverId = null;
+  let focusSet = null;
+  let zoomK = 1;
+  let adj = new Map();
+  function freshState() { return { nodes: new Map(), links: new Map(), selected: null, query: '' }; }
+  class Cancel extends Error { constructor() { super('cancelled'); this.name = 'Cancel'; } }
+  const check = my => { if (my !== runId) throw new Cancel(); };
+
+  // ---------- OpenAlex ----------
+  async function api(path, params) {
+    const p = new URLSearchParams(params);
+    const email = $('#email').value.trim(), key = $('#apikey').value.trim();
+    if (email) p.set('mailto', email);
+    if (key) p.set('api_key', key);
+    const url = `${API}${path}?${p}`;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      let r;
+      try { r = await fetch(url); } catch (e) { await sleep(800 * 2 ** attempt); continue; }
+      if (r.status === 429 || r.status >= 500) { await sleep(1000 * 2 ** attempt); continue; }
+      if (!r.ok) {
+        let msg = `OpenAlex error ${r.status}`;
+        try { const j = await r.json(); if (j.message || j.error) msg += `: ${j.message || j.error}`; } catch {}
+        throw new Error(msg);
+      }
+      return r.json();
+    }
+    throw new Error('OpenAlex is rate-limiting or unreachable. Wait a moment and try again (adding your email in Options helps).');
+  }
+
+  async function pool(items, n, fn) {
+    let i = 0;
+    const workers = Array.from({ length: Math.min(n, items.length) }, async () => {
+      while (i < items.length) { const j = i++; await fn(items[j], j); }
+    });
+    await Promise.all(workers);
+  }
+  const chunk = (arr, n) => Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
+
+  function invertAbstract(idx) {
+    if (!idx) return '';
+    const words = [];
+    for (const [w, pos] of Object.entries(idx)) for (const p of pos) words[p] = w;
+    return words.filter(x => x !== undefined).join(' ');
+  }
+
+  function toNode(w, layer) {
+    return {
+      id: short(w.id),
+      title: w.display_name || '(untitled)',
+      year: w.publication_year || null,
+      cites: w.cited_by_count || 0,
+      authors: (w.authorships || []).map(a => a.author && a.author.display_name).filter(Boolean),
+      venue: (w.primary_location && w.primary_location.source && w.primary_location.source.display_name) || '',
+      doi: w.doi || '',
+      type: w.type || '',
+      refs: (w.referenced_works || []).map(short),
+      related: (w.related_works || []).map(short),
+      abstract: invertAbstract(w.abstract_inverted_index),
+      layer
+    };
+  }
+
+  function addLink(a, b, kind) {
+    if (a === b) return;
+    if (kind === 'citedby') { [a, b] = [b, a]; kind = 'cites'; } // normalise: source cites target
+    const key = [a, b].sort().join('~');
+    if (state.links.has(key)) return;
+    state.links.set(key, { key, source: a, target: b, kind });
+  }
+
+  function crossLinks() {
+    for (const n of state.nodes.values()) {
+      if (n.isTopic) continue;
+      for (const r of n.refs) if (state.nodes.has(r)) addLink(n.id, r, 'cites');
+      for (const r of n.related) if (state.nodes.has(r)) addLink(n.id, r, 'related');
+    }
+  }
+
+  const DEFAULT_COUNTS = [15, 40, 50, 60, 60];
+  let counts = DEFAULT_COUNTS.slice();
+  function drawLayerInputs() {
+    const n = parseInt($('#layers').value, 10) || 3;
+    const box = $('#perLayer');
+    box.innerHTML = '';
+    for (let i = 0; i < n; i++) {
+      const lab = document.createElement('label');
+      lab.innerHTML = `<span class="dot" style="background:${color(i + 1)}"></span>L${i + 1}`;
+      const inp = document.createElement('input');
+      inp.type = 'number'; inp.min = 1; inp.max = i === 0 ? 200 : 500; inp.value = counts[i];
+      inp.setAttribute('aria-label', `Papers in layer ${i + 1}`);
+      inp.oninput = () => { const v = parseInt(inp.value, 10); if (v > 0) counts[i] = Math.min(v, +inp.max); };
+      lab.appendChild(inp);
+      box.appendChild(lab);
+    }
+  }
+  function layerCounts() { return counts.slice(0, parseInt($('#layers').value, 10) || 3); }
+  $('#layers').addEventListener('change', drawLayerInputs);
+
+  function readOpts() {
+    const num = (id, d) => { const v = parseInt($(id).value, 10); return Number.isFinite(v) ? v : d; };
+    const fromYear = num('#fromYear', 0);
+    return {
+      layers: num('#layers', 3),
+      perNode: Math.max(1, num('#perNode', 4)),
+      counts: layerCounts(),
+      fromYear,
+      filter: fromYear ? `publication_year:>${fromYear - 1}` : '',
+      seedSort: $('#seedSort').value,
+      refs: $('#refs').checked, related: $('#related').checked, citing: $('#citing').checked
+    };
+  }
+
+  // Expand a set of parent papers into the next layer.
+  async function expandLayer(parents, L, opts, my, cap) {
+    const cand = new Map();
+    const fetched = new Map();
+    const add = (id, parent, kind) => {
+      if (!id || id === parent) return;
+      if (state.nodes.has(id)) { addLink(parent, id, kind); return; }
+      let c = cand.get(id);
+      if (!c) { c = { id, links: [] }; cand.set(id, c); }
+      c.links.push({ parent, kind });
+    };
+    for (const p of parents) {
+      if (opts.refs) p.refs.forEach(id => add(id, p.id, 'cites'));
+      if (opts.related) p.related.forEach(id => add(id, p.id, 'related'));
+    }
+    if (opts.citing) {
+      let done = 0;
+      await pool(parents, 4, async p => {
+        check(my);
+        const r = await api('/works', {
+          filter: `cites:${p.id}` + (opts.filter ? ',' + opts.filter : ''),
+          sort: 'cited_by_count:desc', per_page: Math.max(opts.perNode * 2, 5), select: FIELDS
+        });
+        check(my);
+        r.results.forEach(w => { const id = short(w.id); fetched.set(id, w); add(id, p.id, 'citedby'); });
+        status(`Layer ${L}: collecting citing papers ${++done}/${parents.length}`);
+      });
+    }
+    const nParents = c => new Set(c.links.map(l => l.parent)).size;
+    const ranked = [...cand.values()].sort((a, b) => nParents(b) - nParents(a));
+    const need = ranked.slice(0, Math.max(cap * 4, 200)).map(c => c.id).filter(id => !fetched.has(id));
+    const batches = chunk(need, 50);
+    let done = 0;
+    await pool(batches, 3, async ids => {
+      check(my);
+      const r = await api('/works', { filter: 'openalex_id:' + ids.join('|'), per_page: 50, select: FIELDS });
+      check(my);
+      r.results.forEach(w => fetched.set(short(w.id), w));
+      status(`Layer ${L}: fetching candidates ${++done}/${batches.length}`);
+    });
+    check(my);
+
+    const scored = [];
+    for (const c of cand.values()) {
+      const w = fetched.get(c.id);
+      if (!w) continue;
+      if (opts.fromYear && (w.publication_year || 0) < opts.fromYear) continue;
+      c.w = w;
+      c.score = nParents(c) * 1.5 + Math.log10(1 + (w.cited_by_count || 0));
+      scored.push(c);
+    }
+    // each parent keeps its best few links, then the layer is capped overall
+    const byParent = new Map();
+    for (const c of scored) for (const l of c.links) {
+      if (!byParent.has(l.parent)) byParent.set(l.parent, new Set());
+      byParent.get(l.parent).add(c);
+    }
+    const chosen = new Set();
+    for (const set of byParent.values()) {
+      [...set].sort((a, b) => b.score - a.score).slice(0, opts.perNode).forEach(c => chosen.add(c));
+    }
+    let selected = [...chosen].sort((a, b) => b.score - a.score).slice(0, cap);
+    if (selected.length < cap) {
+      // fill the layer up to the requested size with the next-best candidates
+      const rest = scored.filter(c => !chosen.has(c)).sort((a, b) => b.score - a.score);
+      selected = selected.concat(rest.slice(0, cap - selected.length));
+    }
+    const out = [];
+    const angleOf = c => {
+      const p0 = state.nodes.get(c.links[0].parent);
+      return p0 && (p0.x || p0.y) ? Math.atan2(p0.y, p0.x) : Math.random() * 2 * Math.PI;
+    };
+    // a whole new layer is spread evenly round its ring, in the angular order of its parents;
+    // a single-paper expansion stays close to that paper
+    const spread = parents.length > 1;
+    const order = selected.map(c => ({ c, a: angleOf(c) })).sort((x, y) => x.a - y.a);
+    for (let i = 0; i < order.length; i++) {
+      const c = order[i].c;
+      const n = toNode(c.w, L);
+      const ang = spread ? order[0].a + (i / order.length) * 2 * Math.PI : order[i].a + (Math.random() - .5) * 0.6;
+      n.x = Math.cos(ang) * L * RING;
+      n.y = Math.sin(ang) * L * RING;
+      state.nodes.set(n.id, n);
+      for (const l of c.links) addLink(l.parent, n.id, l.kind);
+      out.push(n);
+    }
+    return out;
+  }
+
+  async function build() {
+    const q = $('#q').value.trim();
+    if (!q) return;
+    const opts = readOpts();
+    const my = ++runId;
+    saveSettings();
+    writeHash(q, opts);
+    state = freshState();
+    state.query = q;
+    hoverId = null;
+    $('#empty').style.display = 'none';
+    render();
+    showHelp();
+    $('#go').disabled = true;
+    try {
+      status('Searching OpenAlex…');
+      const topic = { id: 'TOPIC', title: q, layer: 0, isTopic: true, x: 0, y: 0, fx: 0, fy: 0, cites: 0, authors: [], refs: [], related: [] };
+      state.nodes.set(topic.id, topic);
+      const p = { search: q, per_page: opts.counts[0], select: FIELDS };
+      if (opts.filter) p.filter = opts.filter;
+      if (opts.seedSort === 'cites') p.sort = 'cited_by_count:desc';
+      const res = await api('/works', p);
+      check(my);
+      if (!res.results || !res.results.length) {
+        status('No papers found. Try broader keywords.', true);
+        state = freshState(); render(); $('#empty').style.display = ''; return;
+      }
+      let frontier = [];
+      res.results.forEach((w, i) => {
+        const n = toNode(w, 1);
+        const a = (i / res.results.length) * 2 * Math.PI;
+        n.x = Math.cos(a) * RING; n.y = Math.sin(a) * RING;
+        state.nodes.set(n.id, n);
+        addLink('TOPIC', n.id, 'topic');
+        frontier.push(n);
+      });
+      crossLinks(); render(); fit(false);
+      for (let L = 2; L <= opts.layers && frontier.length; L++) {
+        status(`Building layer ${L}…`);
+        frontier = await expandLayer(frontier, L, opts, my, opts.counts[L - 1]);
+        crossLinks(); render();
+      }
+      const n = state.nodes.size - 1;
+      status(`${n} papers, ${state.links.size} links. Click a paper for details, or expand it.`);
+      setTimeout(() => { if (my === runId) fit(true); }, 1500);
+    } catch (e) {
+      if (e.name !== 'Cancel') status(e.message, true);
+    } finally {
+      if (my === runId) $('#go').disabled = false;
+    }
+  }
+
+  async function expandNode(n) {
+    const my = runId;
+    const btn = $('#expandBtn');
+    if (btn) btn.disabled = true;
+    try {
+      const opts = readOpts();
+      status(`Expanding “${n.title.slice(0, 50)}…”`);
+      const per = opts.perNode * 2;
+      const out = await expandLayer([n], n.layer + 1, { ...opts, perNode: per }, my, per);
+      crossLinks(); render(); select(n.id);
+      status(out.length ? `Added ${out.length} papers around this one.` : 'No new connected papers found for this one.');
+    } catch (e) {
+      if (e.name !== 'Cancel') status(e.message, true);
+    } finally {
+      const b = $('#expandBtn'); if (b) b.disabled = false;
+    }
+  }
+
+  // ---------- graph ----------
+  const svg = d3.select('#svg');
+  const root = svg.append('g');
+  const ringG = root.append('g');
+  const linkG = root.append('g');
+  const nodeG = root.append('g');
+  const labelG = root.append('g');
+  let linkSel = linkG.selectAll('line'), nodeSel = nodeG.selectAll('circle'), labelSel = labelG.selectAll('text');
+
+  const zoom = d3.zoom().scaleExtent([0.08, 8]).on('zoom', e => {
+    root.attr('transform', e.transform);
+    const changed = (zoomK < 1.6) !== (e.transform.k < 1.6);
+    zoomK = e.transform.k;
+    if (changed) updateLabels();
+  });
+  svg.call(zoom).on('dblclick.zoom', null);
+  svg.on('click', () => select(null));
+
+  const deg = x => (adj.get(sid(x)) || { size: 1 }).size;
+  const radius = d => d.isTopic ? 16 : 3.5 + 2.1 * Math.log10(1 + d.cites);
+
+  const sim = d3.forceSimulation()
+    .force('link', d3.forceLink().id(d => d.id)
+      .distance(l => l.kind === 'topic' ? RING : 45)
+      .strength(l => l.kind === 'topic' ? 0.03 : 0.25 / Math.max(1, Math.min(deg(l.source), deg(l.target)))))
+    .force('charge', d3.forceManyBody().strength(d => d.isTopic ? 0 : -140).distanceMax(1200))
+    .force('collide', d3.forceCollide(d => radius(d) + 3))
+    .force('radial', d3.forceRadial(d => d.layer * RING, 0, 0).strength(0.8))
+    .alphaDecay(0.02)
+    .on('tick', ticked);
+
+  function ticked() {
+    linkSel.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+      .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+    nodeSel.attr('cx', d => d.x).attr('cy', d => d.y);
+    labelSel.attr('x', d => d.isTopic ? d.x : d.x + radius(d) + 3)
+      .attr('y', d => d.isTopic ? d.y - 22 : d.y + 3.5);
+  }
+
+  const drag = d3.drag()
+    .on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.2).restart(); d.fx = d.x; d.fy = d.y; })
+    .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+    .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); if (!d.isTopic) { d.fx = null; d.fy = null; } });
+
+  const tip = $('#tip');
+  function labelText(d) {
+    if (d.isTopic) return d.title;
+    const t = d.title.length > 38 ? d.title.slice(0, 36) + '…' : d.title;
+    return `${t}${d.year ? ' (' + d.year + ')' : ''}`;
+  }
+
+  function render() {
+    const nodes = [...state.nodes.values()];
+    const links = [...state.links.values()];
+    adj = new Map();
+    for (const l of links) {
+      const a = sid(l.source), b = sid(l.target);
+      if (!adj.has(a)) adj.set(a, new Set());
+      if (!adj.has(b)) adj.set(b, new Set());
+      adj.get(a).add(b); adj.get(b).add(a);
+    }
+    sim.nodes(nodes);
+    sim.force('link').links(links);
+
+    linkSel = linkG.selectAll('line').data(links, d => d.key)
+      .join('line').attr('class', d => 'link ' + d.kind);
+
+    nodeSel = nodeG.selectAll('circle').data(nodes, d => d.id)
+      .join(enter => enter.append('circle').attr('class', 'node').call(drag)
+        .on('click', (e, d) => { e.stopPropagation(); select(d.id); })
+        .on('mouseenter', (e, d) => { hoverId = d.id; applyHighlight(); showTip(e, d); })
+        .on('mousemove', (e, d) => showTip(e, d))
+        .on('mouseleave', () => { hoverId = null; tip.style.display = 'none'; applyHighlight(); }))
+      .attr('r', radius).attr('fill', d => color(d.layer));
+
+    labelSel = labelG.selectAll('text').data(nodes, d => d.id)
+      .join('text').attr('class', d => 'label' + (d.isTopic ? ' topic' : ''))
+      .attr('text-anchor', d => d.isTopic ? 'middle' : 'start')
+      .text(labelText);
+
+    drawRings();
+    applyHighlight();
+    updateLegend();
+    renderList();
+    sim.alpha(0.9).restart();
+  }
+
+  function showTip(e, d) {
+    if (d.isTopic) { tip.style.display = 'none'; return; }
+    tip.innerHTML = `<b>${esc(d.title)}</b><br><span style="color:var(--muted)">${esc(d.authors[0] || '')}${d.authors.length > 1 ? ' et al.' : ''} · ${d.year || 'n.d.'} · cited by ${d.cites}</span>`;
+    tip.style.display = 'block';
+    const x = Math.min(e.clientX + 14, window.innerWidth - 350);
+    tip.style.left = x + 'px'; tip.style.top = (e.clientY + 14) + 'px';
+  }
+
+  function drawRings() {
+    const show = $('#rings').checked;
+    const maxL = d3.max([...state.nodes.values()], d => d.layer) || 0;
+    const data = show ? d3.range(1, maxL + 1) : [];
+    ringG.selectAll('circle').data(data).join('circle').attr('class', 'ring').attr('r', d => d * RING);
+    ringG.selectAll('text').data(data).join('text').attr('class', 'ringlabel')
+      .attr('x', 0).attr('y', d => -d * RING - 6).attr('text-anchor', 'middle').text(d => `layer ${d}`);
+  }
+
+  function applyHighlight() {
+    const f = hoverId || state.selected;
+    focusSet = f ? new Set([f, ...(adj.get(f) || [])]) : null;
+    nodeSel.classed('dim', d => !!focusSet && !focusSet.has(d.id)).classed('sel', d => d.id === state.selected);
+    linkSel.classed('dim', l => !!f && sid(l.source) !== f && sid(l.target) !== f)
+      .classed('hl', l => !!f && (sid(l.source) === f || sid(l.target) === f));
+    labelSel.classed('dim', d => !!focusSet && !focusSet.has(d.id));
+    updateLabels();
+  }
+
+  function updateLabels() {
+    labelSel.style('display', d =>
+      (d.layer <= 1 || zoomK >= 1.6 || (focusSet && focusSet.has(d.id))) ? null : 'none');
+  }
+
+  function fit(animate) {
+    const nodes = [...state.nodes.values()];
+    if (!nodes.length) return;
+    const { width, height } = svg.node().getBoundingClientRect();
+    const xs = nodes.map(d => d.x), ys = nodes.map(d => d.y);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const k = Math.min(2, 0.9 * Math.min(width / (x1 - x0 + 120), height / (y1 - y0 + 120)));
+    const t = d3.zoomIdentity.translate(width / 2 - k * (x0 + x1) / 2, height / 2 - k * (y0 + y1) / 2).scale(k);
+    (animate ? svg.transition().duration(600) : svg).call(zoom.transform, t);
+  }
+
+  function updateLegend() {
+    const el = $('#legend');
+    const counts = d3.rollup([...state.nodes.values()].filter(n => !n.isTopic), v => v.length, d => d.layer);
+    if (!counts.size) { el.hidden = true; return; }
+    el.hidden = false;
+    el.innerHTML = [...counts].sort((a, b) => a[0] - b[0])
+      .map(([L, c]) => `<div><span class="dot" style="background:${color(L)}"></span>Layer ${L} · ${c}</div>`).join('')
+      + `<div style="margin-top:4px"><span class="ln"></span>citation</div><div><span class="ln dash"></span>related work</div>`
+      + `<div style="margin-top:4px">size = citations</div>`;
+  }
+
+  // ---------- side panel ----------
+  function select(id) {
+    state.selected = id && state.nodes.has(id) ? id : null;
+    applyHighlight();
+    if (!state.selected) { showHelp(); return; }
+    const n = state.nodes.get(state.selected);
+    if (n.isTopic) { showHelp(); return; }
+    showTab('details');
+    showDetails(n);
+  }
+
+  function relationsOf(n) {
+    const rels = [];
+    for (const l of state.links.values()) {
+      const a = sid(l.source), b = sid(l.target);
+      if (a !== n.id && b !== n.id) continue;
+      const other = state.nodes.get(a === n.id ? b : a);
+      if (!other || other.isTopic) continue;
+      let rel = 'related';
+      if (l.kind === 'cites') rel = a === n.id ? 'cites' : 'cited by';
+      rels.push({ rel, other });
+    }
+    const order = { 'cites': 0, 'cited by': 1, 'related': 2 };
+    return rels.sort((x, y) => order[x.rel] - order[y.rel] || y.other.cites - x.other.cites);
+  }
+
+  function showDetails(n) {
+    const authors = n.authors.length > 8 ? n.authors.slice(0, 8).join(', ') + ', et al.' : n.authors.join(', ');
+    const scholar = 'https://scholar.google.com/scholar?q=' + encodeURIComponent(n.title);
+    const rels = relationsOf(n);
+    $('#details').innerHTML = `
+      <div class="rel" style="color:${color(n.layer)}">Layer ${n.layer}</div>
+      <h2>${esc(n.title)}</h2>
+      <div class="meta">${esc(authors) || 'Unknown authors'}<br>${n.year || 'n.d.'}${n.venue ? ' · ' + esc(n.venue) : ''} · cited by ${n.cites}</div>
+      <div class="links">
+        ${n.doi ? `<a href="${esc(n.doi)}" target="_blank" rel="noopener">DOI</a>` : ''}
+        <a href="${scholar}" target="_blank" rel="noopener">Google Scholar</a>
+        <a href="https://openalex.org/works/${esc(n.id)}" target="_blank" rel="noopener">OpenAlex</a>
+      </div>
+      <div class="actions">
+        <button id="expandBtn" type="button">Expand from this paper</button>
+        <button id="bibOne" type="button">Copy BibTeX</button>
+      </div>
+      ${n.abstract ? `<details class="abs" open><summary>Abstract</summary><p>${esc(n.abstract)}</p></details>` : '<div class="meta">No abstract available.</div>'}
+      <h4>Connections in this map · ${rels.length}</h4>
+      ${rels.map(r => `<div class="item" data-id="${esc(r.other.id)}"><div class="rel">${r.rel}</div><div class="t">${esc(r.other.title)}</div><div class="m">${r.other.year || 'n.d.'} · cited by ${r.other.cites} · layer ${r.other.layer}</div></div>`).join('') || '<div class="meta">Linked only to the search topic.</div>'}
+    `;
+    $('#expandBtn').onclick = () => expandNode(n);
+    $('#bibOne').onclick = async e => {
+      try { await navigator.clipboard.writeText(toBibtex([n])); e.target.textContent = 'Copied'; }
+      catch { e.target.textContent = 'Copy failed'; }
+      setTimeout(() => { e.target.textContent = 'Copy BibTeX'; }, 1500);
+    };
+  }
+
+  function showHelp() {
+    $('#details').innerHTML = `<div class="help">
+      <h2>How to read the map</h2>
+      <p>The white node in the centre is your topic. Each ring outward is a layer:</p>
+      <ul>
+        <li><b>Layer 1</b> – papers that match your keywords.</li>
+        <li><b>Layer 2</b> – papers cited by, citing, or related to layer 1. Papers that connect to several layer‑1 papers are preferred.</li>
+        <li><b>Layer 3+</b> – the same step, applied to the layer before.</li>
+      </ul>
+      <p>Node size shows citation count. Solid lines are citations; dashed lines are OpenAlex “related works”. Lines between papers in the same layer show they cite each other.</p>
+      <p>Hover over a node to highlight its neighbours, click it for details, and drag to rearrange. Scroll to zoom; labels for outer layers appear when you zoom in.</p>
+      <p>The URL updates with your search, so you can bookmark or share a map.</p>
+    </div>`;
+  }
+
+  function showTab(name) {
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+    document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === name));
+  }
+  document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+
+  function renderList() {
+    const f = $('#listFilter').value.trim().toLowerCase();
+    const nodes = [...state.nodes.values()].filter(n => !n.isTopic &&
+      (!f || (n.title + ' ' + n.authors.join(' ')).toLowerCase().includes(f)));
+    const groups = d3.groups(nodes, d => d.layer).sort((a, b) => a[0] - b[0]);
+    $('#listBody').innerHTML = groups.map(([L, arr]) =>
+      `<h4><span class="dot" style="background:${color(L)}"></span>Layer ${L} · ${arr.length}</h4>` +
+      arr.sort((a, b) => b.cites - a.cites).map(n =>
+        `<div class="item" data-id="${esc(n.id)}"><div class="t">${esc(n.title)}</div><div class="m">${esc(n.authors[0] || '')}${n.authors.length > 1 ? ' et al.' : ''} · ${n.year || 'n.d.'} · cited by ${n.cites}</div></div>`
+      ).join('')).join('') || '<div class="meta">No papers yet.</div>';
+  }
+  $('#listFilter').addEventListener('input', renderList);
+
+  function focusNode(id) {
+    const n = state.nodes.get(id);
+    if (!n) return;
+    select(id);
+    svg.transition().duration(500).call(zoom.translateTo, n.x, n.y);
+  }
+  $('#listBody').addEventListener('click', e => { const it = e.target.closest('.item'); if (it) focusNode(it.dataset.id); });
+  $('#details').addEventListener('click', e => { const it = e.target.closest('.item'); if (it) focusNode(it.dataset.id); });
+
+  // ---------- export ----------
+  function download(name, text, mime) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: mime }));
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  const papers = () => [...state.nodes.values()].filter(n => !n.isTopic).sort((a, b) => a.layer - b.layer || b.cites - a.cites);
+  const slug = () => (state.query || 'map').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'map';
+
+  function toBibtex(list) {
+    const used = new Set();
+    const bibEsc = s => String(s || '').replace(/[{}]/g, '');
+    return list.map(n => {
+      const last = ((n.authors[0] || 'anon').split(/\s+/).pop() || 'anon').normalize('NFD').replace(/[^A-Za-z]/g, '').toLowerCase() || 'anon';
+      const word = ((n.title.match(/[A-Za-z]{4,}/) || ['paper'])[0]).toLowerCase();
+      let key = `${last}${n.year || ''}${word}`, k = key, i = 0;
+      while (used.has(k)) k = key + String.fromCharCode(97 + i++);
+      used.add(k);
+      const type = n.type === 'book' ? 'book' : (n.type === 'article' && n.venue) ? 'article' : 'misc';
+      const f = [
+        `  title = {{${bibEsc(n.title)}}}`,
+        n.authors.length && `  author = {${bibEsc(n.authors.join(' and '))}}`,
+        n.year && `  year = {${n.year}}`,
+        n.venue && (type === 'article' ? `  journal = {${bibEsc(n.venue)}}` : `  howpublished = {${bibEsc(n.venue)}}`),
+        n.doi && `  doi = {${n.doi.replace(/^https?:\/\/doi\.org\//, '')}}`,
+        `  note = {OpenAlex ${n.id}; literature map layer ${n.layer}}`
+      ].filter(Boolean);
+      return `@${type}{${k},\n${f.join(',\n')}\n}`;
+    }).join('\n\n');
+  }
+
+  $('#expBib').onclick = () => { const p = papers(); if (p.length) download(`${slug()}.bib`, toBibtex(p), 'text/plain'); };
+  $('#expCsv').onclick = () => {
+    const p = papers(); if (!p.length) return;
+    const q = s => `"${String(s ?? '').replace(/"/g, '""')}"`;
+    const rows = [['layer', 'title', 'year', 'authors', 'venue', 'cited_by', 'doi', 'openalex'].join(',')]
+      .concat(p.map(n => [n.layer, q(n.title), n.year || '', q(n.authors.join('; ')), q(n.venue), n.cites, q(n.doi), n.id].join(',')));
+    download(`${slug()}.csv`, rows.join('\n'), 'text/csv');
+  };
+  $('#expJson').onclick = () => {
+    const p = papers(); if (!p.length) return;
+    const data = {
+      query: state.query, created: new Date().toISOString(), source: 'OpenAlex',
+      nodes: p.map(({ id, title, year, cites, authors, venue, doi, type, layer, abstract }) => ({ id, title, year, cites, authors, venue, doi, type, layer, abstract })),
+      links: [...state.links.values()].filter(l => l.kind !== 'topic').map(l => ({ source: sid(l.source), target: sid(l.target), kind: l.kind }))
+    };
+    download(`${slug()}.json`, JSON.stringify(data, null, 2), 'application/json');
+  };
+
+  // ---------- misc UI ----------
+  function status(msg, err) { const el = $('#status'); el.textContent = msg || ''; el.classList.toggle('err', !!err); }
+  $('#fit').onclick = () => fit(true);
+  $('#rings').onchange = () => {
+    sim.force('radial').strength($('#rings').checked ? 0.8 : 0.02);
+    drawRings(); sim.alpha(0.6).restart();
+  };
+  $('#form').addEventListener('submit', e => { e.preventDefault(); build(); });
+  document.querySelectorAll('#empty .ex').forEach(el => el.onclick = () => { $('#q').value = el.textContent; build(); });
+
+  function saveSettings() { store.set('litmap.email', $('#email').value.trim()); store.set('litmap.key', $('#apikey').value.trim()); }
+  $('#email').value = store.get('litmap.email');
+  $('#apikey').value = store.get('litmap.key');
+
+  function writeHash(q, o) {
+    const p = new URLSearchParams({ q, layers: o.layers, n: o.counts.join('-'), per: o.perNode,
+      refs: +o.refs, rel: +o.related, cit: +o.citing, sort: o.seedSort });
+    if (o.fromYear) p.set('from', o.fromYear);
+    history.replaceState(null, '', '#' + p);
+  }
+  function readHash() {
+    const p = new URLSearchParams(location.hash.slice(1));
+    if (!p.get('q')) return false;
+    $('#q').value = p.get('q');
+    const set = (id, k) => { if (p.has(k)) $(id).value = p.get(k); };
+    set('#layers', 'layers'); set('#perNode', 'per'); set('#fromYear', 'from'); set('#seedSort', 'sort');
+    if (p.get('n')) p.get('n').split('-').forEach((v, i) => { const k = parseInt(v, 10); if (k > 0 && i < counts.length) counts[i] = k; });
+    drawLayerInputs();
+    if (p.has('refs')) $('#refs').checked = p.get('refs') === '1';
+    if (p.has('rel')) $('#related').checked = p.get('rel') === '1';
+    if (p.has('cit')) $('#citing').checked = p.get('cit') === '1';
+    return true;
+  }
+
+  drawLayerInputs();
+  showHelp();
+  svg.call(zoom.transform, d3.zoomIdentity.translate(svg.node().clientWidth / 2, svg.node().clientHeight / 2));
+  if (readHash()) build();
+})();
+</script>
+</body>
+</html>
